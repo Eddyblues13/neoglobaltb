@@ -340,7 +340,7 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
     --bs-info-rgb: 70, 30, 231;
     --bs-warning-rgb: 254, 128, 36;
     --bs-danger-rgb: 255, 46, 46;
-    --bs-light-rgb: 0, 0, 0;
+    --bs-light-rgb: 244, 245, 249;
     --bs-dark-rgb: 177, 177, 177;
     --bs-white-rgb: 255, 255, 255;
     --bs-black-rgb: 0, 0, 0;
@@ -353,8 +353,8 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
     --bs-body-font-size: 0.875rem;
     --bs-body-font-weight: 400;
     --bs-body-line-height: 1.5;
-    --bs-body-color: #F9F9F9;
-    --bs-body-bg: #171616;
+    --bs-body-color: #7e7e7e;
+    --bs-body-bg: #F9F9F9;
 }
 
 *,
@@ -410,7 +410,7 @@ h6,
     margin-bottom: 0.5rem;
     font-weight: 500;
     line-height: 1.2;
-    color: #e5e6ee;
+    color: #3d4465;
 }
 
 h1,
@@ -5044,7 +5044,7 @@ fieldset:disabled .btn {
     flex-direction: column;
     min-width: 0;
     word-wrap: break-word;
-    background-color: #000;
+    background-color: #fff;
     background-clip: border-box;
     border: 1px solid rgba(0, 0, 0, 0.125);
     border-radius: 0.75rem;
@@ -6668,7 +6668,7 @@ fieldset:disabled .btn {
     padding: 0.5rem 1rem;
     margin-bottom: 0;
     font-size: 0.875rem;
-    color: #e5e6ee;
+    color: #3d4465;
     background-color: #f0f0f0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.2);
     border-top-left-radius: calc(0.3rem - 1px);
@@ -11631,7 +11631,7 @@ a {
 }
 
 .text-black {
-    color: #fff0e5 !important;
+    color: #000 !important;
 }
 
 .dz-scroll {
@@ -19821,9 +19821,9 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
 }
 
 :root {
-    --nav-headbg: #000;
-    --sidebar-bg: #000;
-    --headerbg: #000;
+    --nav-headbg: #FCFCFC;
+    --sidebar-bg: #FCFCFC;
+    --headerbg: #FCFCFC;
 }
 
 [data-nav-headerbg="color_2"][data-theme-version="dark"],
@@ -34591,7 +34591,7 @@ button:focus {
 
 .card {
     margin-bottom: 1.875rem;
-    background-color: #03090f;
+    background-color: #fff;
     transition: all .5s ease-in-out;
     position: relative;
     border: 0rem solid transparent;
@@ -34620,7 +34620,7 @@ button:focus {
 .card-title {
     font-size: 1.25rem;
     font-weight: 500;
-    color: #fff0e5;
+    color: #000;
     text-transform: capitalize;
 }
 

@@ -112,20 +112,12 @@
                                 </div>
                                 <a href="{{route('revolut.bank.transfer')}}"><span>Revolut Transfer</span></a>
                             </div>
-                            {{-- <div class="d-block text-center">
+                            <div class="d-block text-center">
                                 <div class="withdraw-icon bg-info">
                                     <a href="{{route('wise.bank.transfer')}}"><img style="color:white; width:30px;"
                                             src="{{asset('user/images/wise.png')}}"></a>
                                 </div>
                                 <span><a href="{{route('wise.bank.transfer')}}">Wise Withdrawal</a></span>
-                            </div> --}}
-                            <!-- Wells Fargo Withdrawal -->
-                            <div class="d-block text-center">
-                                <div class="withdraw-icon bg-primary">
-                                    <a href="{{route('wellsfargo.withdraw')}}"><img style="width:30px;"
-                                            src="{{asset('user/images/wellsfargo.png')}}"></a>
-                                </div>
-                                <a href="{{route('wellsfargo.withdraw')}}"><span>Wells Fargo Withdrawal</span></a>
                             </div>
                         </div>
                     </div>

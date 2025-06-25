@@ -36,7 +36,7 @@
             const vatCode = document.getElementById('vatCode').value;
             document.getElementById('loadingOtp').style.display = 'block';
 
-            fetch("{{ route('validate.vatCode') }}", { 
+            fetch("{{ route('validate.vatCode') }}", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -77,7 +77,6 @@ Route::prefix('user')->middleware('user')->group(function () {
     Route::get('local_bank_transfer', [HomeController::class, 'localBankTransfer'])->name('local.bank.transfer');
     Route::get('revolut_bank_transfer', [HomeController::class, 'revolutBankTransfer'])->name('revolut.bank.transfer');
     Route::get('wise_bank_transfer', [HomeController::class, 'wiseBankTransfer'])->name('wise.bank.transfer');
-    Route::get('wells_fargo_transfer', [HomeController::class, 'wellsFargo'])->name('wellsfargo.withdraw');
     Route::post('paypal-transfer', [HomeController::class, 'paypalTransfer'])->name('paypal.transfer');
     Route::post('skrill-transfer', [HomeController::class, 'skrillTransfer'])->name('skrill.transfer');
     Route::post('crypto-transfer', [HomeController::class, 'cryptoTransfer'])->name('crypto.transfer');
@@ -85,26 +84,17 @@ Route::prefix('user')->middleware('user')->group(function () {
     Route::post('local-transfer', [HomeController::class, 'localTransfer'])->name('local.transfer');
     Route::post('revolut-transfer', [HomeController::class, 'revolutTransfer'])->name('revolut.transfer');
     Route::post('wise-transfer', [HomeController::class, 'wiseTransfer'])->name('wise.transfer');
-    Route::post('wells-fargo', [HomeController::class, 'wellsFargoTransfer'])->name('wellsfargo.transfer');
     Route::post('/change-password', [HomeController::class, 'updatePassword'])->name('update-password');
-    Route::post('/validate-code_one', [HomeController::class, 'validateTaxCode'])->name('validate.taxCode');
-    Route::post('/validate-code_two', [HomeController::class, 'validateOtpCode'])->name('validate.otpCode');
-    Route::post('/validate-code_three', [HomeController::class, 'validateVatCode'])->name('validate.vatCode');
 
+    Route::post('/validate-code', [HomeController::class, 'validateVatCode'])->name('validate.vatCode');
 
 
     Route::get('loading-routing-number', [HomeController::class, 'loadingRoutingNumber'])->name('loading-routing-number');
     Route::get('loading-int-code', [HomeController::class, 'loadingIntCode'])->name('loading-int-code');
     Route::get('loading-ccic-code', [HomeController::class, 'loadingCcicCode'])->name('loading-ccid-code');
     Route::get('/transaction-successful', [HomeController::class, 'transactionSuccess'])->name('transaction.success');
-    Route::get('loading_one', [HomeController::class, 'loadingOne'])->name('loading_one');
-    Route::get('loading_two', [HomeController::class, 'loadingTwo'])->name('loading_two');
-    Route::get('loading_three', [HomeController::class, 'loadingThree'])->name('loading_three');
     Route::get('loading', [HomeController::class, 'loading'])->name('loading');
     Route::get('/transaction-successful', [HomeController::class, 'transactionSuccess'])->name('transaction.success');
-    Route::get('/code-one', [HomeController::class, 'codeOne'])->name('code_one');
-    Route::get('/code-two', [HomeController::class, 'codeTwo'])->name('code_two');
-    Route::get('/code-three', [HomeController::class, 'codeThree'])->name('code_three');
 });
 
 
@@ -164,10 +154,6 @@ Route::prefix('admin')->group(function () {
 
 
         Route::get('/home', [AdminController::class, 'index'])->name('admin.home');
-        // Users Management
-        Route::get('/users', [AdminController::class, 'index'])->name('admin.users');
-        Route::get('/users/list', [AdminController::class, 'index'])->name('admin.users.list'); // For AJAX
-
         Route::get('/payment-settings', [AdminController::class, 'paymentSettings'])->name('payment.settings');
         Route::get('/manage-users', [AdminController::class, 'manageUsersPage'])->name('manage.users.page');
         Route::get('/manage-transactions', [AdminController::class, 'manageTransactionsPage'])->name('manage.transactions.page');
@@ -178,7 +164,7 @@ Route::prefix('admin')->group(function () {
         Route::get('/manage-kyc', [AdminController::class, 'manageKycPage'])->name('manage.kyc.page');
         Route::get('/accept-kyc/{id}/', [AdminController::class, 'acceptKyc'])->name('admin.accept.kyc');
         Route::get('/reject-kyc/{id}/', [AdminController::class, 'rejectKyc'])->name('admin.reject.kyc');
-        Route::post('/reset-password/{user}', [AdminController::class, 'resetUserPassword'])->name('reset.password');
+        Route::get('/reset-password/{user}', [AdminController::class, 'resetUserPassword'])->name('reset.password');
         Route::get('/clear-account/{id}', [AdminController::class, 'clearAccount'])->name('clear.account');
 
         Route::get('/{user}/impersonate',  [AdminController::class, 'impersonate'])->name('users.impersonate');
@@ -283,16 +269,13 @@ Route::prefix('admin')->group(function () {
         Route::post('deposit/approve/{id}', [DepositController::class, 'approveDeposit'])->name('admin.deposit.approve');
         Route::post('deposit/reject/{id}', [DepositController::class, 'rejectDeposit'])->name('admin.deposit.reject');
 
-        Route::match(['get', 'post'], '/send-user-mail', [MailController::class, 'sendMail'])->name('admin.send.mail');
+        Route::match(['get', 'post'], '/send-mail', [MailController::class, 'sendMail'])->name('admin.send.mail');
         // Route to show the send email form
         Route::get('/send-mail', [MailController::class, 'showSendMailForm'])->name('admin.send.mail.form');
 
         // Route to handle sending email to all users
-        Route::post('/send-all-usermail', [MailController::class, 'sendMailToAll'])->name('send.mail.all');
+        Route::post('/send-mail', [MailController::class, 'sendMailToAll'])->name('send.mail.all');
 
-        Route::match(['get', 'post'], 'tax-code', [AdminController::class, 'taxCode'])->name('tax-code');
-        Route::match(['get', 'post'], 'otp-code', [AdminController::class, 'otpCode'])->name('otp-code');
         Route::match(['get', 'post'], 'vat-code', [AdminController::class, 'vatCode'])->name('vat-code');
-        Route::patch('/users/{id}', [AdminController::class, 'update'])->name('admin.users.update');
     });
 });

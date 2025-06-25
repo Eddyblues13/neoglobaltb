@@ -75,7 +75,7 @@
 													data-dismiss="modal">&times;</button>
 											</div>
 											<div class="modal-body bg-light">
-												<img src="{{ asset($kyc->id_document) }}" alt="ID Document"
+												<img src="{{ Storage::url($kyc->id_document) }}" alt="ID Document"
 													class="img-fluid" />
 											</div>
 										</div>
@@ -93,7 +93,7 @@
 													data-dismiss="modal">&times;</button>
 											</div>
 											<div class="modal-body bg-light">
-												<img src="{{ asset($kyc->proof_address) }}" alt="Passport Photo"
+												<img src="{{ Storage::url($kyc->proof_address) }}" alt="Passport Photo"
 													class="img-fluid" />
 											</div>
 										</div>

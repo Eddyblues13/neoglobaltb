@@ -79,7 +79,7 @@
 													data-dismiss="modal">&times;</button>
 											</div>
 											<div class="modal-body bg-light">
-												<img src="{{ asset($deposit->front_cheque) }}" alt="ID Document"
+												<img src="{{ Storage::url($deposit->front_cheque) }}" alt="ID Document"
 													class="img-fluid" />
 											</div>
 										</div>
@@ -98,8 +98,8 @@
 													data-dismiss="modal">&times;</button>
 											</div>
 											<div class="modal-body bg-light">
-												<img src="{{ asset($deposit->back_cheque) }}" alt="Passport Photo"
-													class="img-fluid" />
+												<img src="{{ Storage::url($deposit->back_cheque) }}"
+													alt="Passport Photo" class="img-fluid" />
 											</div>
 										</div>
 									</div>

@@ -35,7 +35,6 @@ class User extends Authenticatable
         'first_code',
         'second_code',
         'ssn',
-        'access',
         'kyc_status',
         'id_document',
         'proof_address',

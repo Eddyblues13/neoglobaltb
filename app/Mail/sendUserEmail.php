@@ -9,11 +9,11 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class sendUserEmail extends Mailable
+class SendUserEmail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $data;
+    protected $data;
     public $subject;
 
     /**
@@ -54,13 +54,5 @@ class sendUserEmail extends Mailable
         );
     }
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array
-     */
-    public function attachments()
-    {
-        return [];
-    }
+    // Attachments method removed for simplicity since it's not being used.
 }

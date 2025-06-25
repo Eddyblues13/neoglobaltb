@@ -8,7 +8,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="color-scheme" content="light dark" />
     <meta name="supported-color-schemes" content="light dark" />
-    <title>{{ $data ?? 'Email' }}</title>
+    <title>{{ $subject ?? 'Email' }}</title>
     <!--[if mso]>
     <style type="text/css">
       .f-fallback  {
@@ -427,7 +427,7 @@
                     <tr>
                         <td class="email-masthead">
                             <a class="f-fallback email-masthead_name">
-                                {{$data}}
+                                {{$subject}}
                             </a>
                         </td>
                     </tr>
@@ -441,7 +441,7 @@
                                     <td class="content-cell">
                                         <div class="f-fallback">
 
-                                            {{$subject}}
+                                            {!!$data!!}
 
                                             <!-- Sub copy -->
                                             <table class="body-sub" role="presentation">

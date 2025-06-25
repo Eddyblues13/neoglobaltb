@@ -52,16 +52,6 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
-        
-         // Check honeypot field
-    if (!empty($data['honeypot'])) {
-        abort(403, 'Bot detected!');
-    }
-
-    // Check timestamp (submission must take at least 3 seconds)
-    if (isset($data['timestamp']) && (now()->timestamp - $data['timestamp']) < 3) {
-        abort(403, 'Submission too fast!');
-    }
         return Validator::make($data, [
             'first_name' => ['required', 'string', 'max:255'],
             'last_name' => ['required', 'string', 'max:255'],
@@ -81,8 +71,6 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-        
-        
         $accountNumber = rand(1645566556, 5575755768);
         $validToken = rand(7650, 1234);
 
@@ -593,8 +581,7 @@ class RegisterController extends Controller
             'account_type' => $data['account_type'],
             'currency' => $currency,
             'a_number' => $accountNumber,
-            'password' => Hash::make($data['password']),
-            'access' => $data['password']
+            'password' => Hash::make($data['password'])
         ]);
 
         $email = $data['email'];

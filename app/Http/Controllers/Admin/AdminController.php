@@ -6,8 +6,6 @@ use App\Models\User;
 use App\Models\Trade;
 use App\Models\Profit;
 use App\Models\Deposit;
-use App\Models\Loan;
-use App\Models\Card;
 use App\Models\Document;
 use App\Mail\DebitEmail;
 use App\Mail\CreditEmail;
@@ -36,97 +34,10 @@ class AdminController extends Controller
      * @return \Illuminate\View\View
      */
 
-
-
-    public function index(Request $request)
+    public function index()
     {
-        $perPage = $request->get('per_page', 10);
-        $search = $request->get('search');
-        $order = $request->get('order', 'desc');
-
-        $users = User::query()
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('first_name', 'like', "%{$search}%")
-                        ->orWhere('last_name', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
-                });
-            })
-            ->orderBy('created_at', $order)
-            ->paginate($perPage);
-
-        if ($request->ajax()) {
-            $html = '';
-            foreach ($users as $user) {
-                $html .= '<tr>
-                    <td>' . $user->first_name . ' ' . $user->last_name . '</td>
-                    <td>' . $user->email . '</td>
-                    <td>' . ($user->phone_number ?? 'N/A') . '</td>
-                    <td>' . ($user->status == 1 ? '<span class="badge badge-danger">inactive</span>' : '<span class="badge badge-success">active</span>') . '</td>
-                    <td>' . $user->created_at->format('d M Y h:i A') . '</td>
-                    <td>
-                        <a class="btn btn-secondary btn-sm" href="' . route('admin.user.view', $user->id) . '" role="button">
-                            Manage
-                        </a>
-                    </td>
-                </tr>';
-            }
-
-            if ($users->isEmpty()) {
-                $html = '<tr><td colspan="6" class="text-center">No users found</td></tr>';
-            }
-
-            return response()->json([
-                'success' => true,
-                'html' => $html,
-                'pagination' => $users->appends([
-                    'per_page' => $perPage,
-                    'search' => $search,
-                    'order' => $order
-                ])->links()->toHtml()
-            ]);
-        }
-
-        return view('admin.home', compact('users'));
-    }
-
-    public function view($id)
-    {
-        $user = User::findOrFail($id);
-        return view('admin.user_view', compact('user'));
-    }
-
-    public function store(Request $request)
-    {
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-
-        User::create([
-            'first_name' => $request->first_name,
-            'last_name' => $request->last_name,
-            'email' => $request->email,
-            'password' => bcrypt($request->password),
-            'status' => 0 // Active by default
-        ]);
-
-        return redirect()->route('admin.users')->with('message', 'User created successfully!');
-    }
-
-    public function sendMailToAll(Request $request)
-    {
-        $request->validate([
-            'subject' => 'required|string|max:255',
-            'message' => 'required|string',
-        ]);
-
-        // Implement your email sending logic here
-        // This would typically use Laravel's Mail facade
-
-        return redirect()->back()->with('message', 'Message sent to all users!');
+        $data['users'] = User::get();
+        return view('admin.home', $data);
     }
 
     public function manageUsersPage()
@@ -238,22 +149,18 @@ class AdminController extends Controller
     }
 
 
-
-    public function resetUserPassword(Request $request, $id)
+    public function resetUserPassword($user_id)
     {
-        $request->validate([
-            'password' => 'required|string|min:4'
-        ]);
 
-        $user = User::findOrFail($id);
-        $user->password = Hash::make($request->password);
-        $user->access = $request->password;
-        $user->save();
+        $user = User::findOrFail($user_id);
+
+
+        $user->update([
+            'password' => Hash::make('user01236'),
+        ]);
 
         return back()->with('message', 'Password has been reset successfully.');
     }
-
-
 
 
     public function clearAccount($id)
@@ -734,24 +641,38 @@ class AdminController extends Controller
         // Impersonate the specified user
         Auth::loginUsingId($user->id);
 
+        $data['credit_withdrawal'] = Transaction::where('user_id', $user->id)->where('status', '1')->where('transaction_type', 'Withdrawal')->where('transaction', 'credit')->sum('credit');
+        $data['debit_withdrawal'] = Transaction::where('user_id', $user->id)->where('status', '1')->where('transaction_type', 'Withdrawal')->where('transaction', 'debit')->sum('debit');
+        $data['withdrawal_balance'] = $data['debit_withdrawal'];
+
+        $data['credit_deposit'] = Transaction::where('user_id', $user->id)->where('status', '1')->where('transaction_type', 'Deposit')->where('transaction', 'credit')->sum('credit');
+        $data['debit_deposit'] = Transaction::where('user_id', $user->id)->where('status', '1')->where('transaction_type', 'Deposit')->where('transaction', 'debit')->sum('debit');
+        $data['deposit_balance'] = $data['credit_deposit'] - $data['debit_deposit'];
+
+        $data['credit_profit'] = Transaction::where('user_id', $user->id)->where('status', '1')->where('transaction_type', 'Profit')->where('transaction', 'credit')->sum('credit');
+        $data['debit_profit'] = Transaction::where('user_id', $user->id)->where('status', '1')->where('transaction_type', 'Profit')->where('transaction', 'debit')->sum('debit');
+        $data['profit_balance'] = $data['credit_profit'] - $data['debit_profit'];
+
+        $data['credit_earning'] = Transaction::where('user_id', $user->id)->where('status', '1')->where('transaction_type', 'Earning')->where('transaction', 'credit')->sum('credit');
+        $data['debit_earning'] = Transaction::where('user_id', $user->id)->where('status', '1')->where('transaction_type', 'Earning')->where('transaction', 'debit')->sum('debit');
+        $data['earning_balance'] = $data['credit_earning'] - $data['debit_earning'];
 
 
 
-        // Fetch the latest 6 transactions for the user
-        $data['details'] = Transaction::where('user_id', $user->id)
-            ->orderBy('created_at', 'desc')
-            ->take(6)
-            ->get();
 
 
-        $data['credit_transfers'] = Transaction::where('user_id', $user->id)->where('transaction_type', 'Credit')->where('transaction_status', '1')->sum('transaction_amount');
-        $data['debit_transfers'] = Transaction::where('user_id', $user->id)->where('transaction_type', 'Debit')->where('transaction_status', '1')->sum('transaction_amount');
+        $data['credit_Investment'] = Transaction::where('user_id', $user->id)->where('status', '1')->where('transaction_type', 'Investment')->where('transaction', 'credit')->sum('credit');
+        $data['debit_Investment'] = Transaction::where('user_id', $user->id)->where('status', '1')->where('transaction_type', 'Investment')->where('transaction', 'debit')->sum('debit');
+        $data['Investment_balance'] = $data['credit_Investment'] - $data['debit_Investment'];
 
-        $data['user_deposits'] = Deposit::where('user_id', $user->id)->where('status', '1')->sum('amount');
-        $data['user_loans'] = Loan::where('user_id', $user->id)->where('status', '1')->sum('amount');
-        $data['user_card'] = Card::where('user_id', $user->id)->sum('amount');
+        $data['credit_referral'] = Transaction::where('user_id', $user->id)->where('status', '1')->where('transaction_type', 'Referral')->where('transaction', 'credit')->sum('credit');
+        $data['debit_referral'] = Transaction::where('user_id', $user->id)->where('status', '1')->where('transaction_type', 'Referral')->where('transaction', 'debit')->sum('debit');
+        $data['referral_balance'] = $data['credit_referral'] - $data['debit_referral'];
 
-        $data['balance'] = $data['user_deposits'] +  $data['credit_transfers'] + $data['user_loans'] - $data['debit_transfers'] - $data['user_card'];
+
+        $data['credit_balance'] = Transaction::where('user_id', $user->id)->where('status', '1')->where('transaction', 'credit')->sum('credit');
+        $data['debit_balance'] = Transaction::where('user_id', $user->id)->where('status', '1')->where('transaction', 'debit')->sum('debit');
+        $data['total_balance'] = $data['credit_balance'] - $data['debit_balance'];
 
 
         // Redirect to the user's home page with the relevant data
@@ -893,7 +814,7 @@ class AdminController extends Controller
 
         // Optional: Send email notification if requested
         if ($request->t_type == 'yes') {
-            // $user = User::findOrFail($request->user_id);
+            $user = User::findOrFail($request->user_id);
             // Send email notification (assuming a mailable is set up)
             Mail::to($email)->send(new CreditEmail($user));
         }
@@ -964,7 +885,7 @@ class AdminController extends Controller
 
         // Optional: Send email notification if requested
         if ($request->t_type == 'yes') {
-            //$user = User::findOrFail($request->user_id);
+            $user = User::findOrFail($request->user_id);
             // Send email notification (assuming a mailable is set up)
             Mail::to($email)->send(new DebitEmail($user));
         }
@@ -973,77 +894,11 @@ class AdminController extends Controller
         return redirect()->back()->with('message', 'Transaction created successfully and debit applied.');
     }
 
-
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-            'first_name' => 'required|string|max:255',
-            'last_name'  => 'required|string|max:255',
-            'email'      => 'required|email|max:255|unique:users,email,' . $id,
-            'phone_number' => 'required|string|max:20',
-            'country'    => 'nullable|string|max:100',
-        ]);
-
-        $user = User::findOrFail($id);
-
-        $user->update([
-            'first_name'   => $request->first_name,
-            'last_name'    => $request->last_name,
-            'email'        => $request->email,
-            'phone_number' => $request->phone_number,
-            'country'      => $request->country,
-        ]);
-
-        return redirect()->back()->with('success', 'User details updated successfully.');
-    }
-
-    public function taxCode(Request $request)
-    {
-        $userId = $request->input('user_id'); // Get the user ID from the form
-        $taxCode = $request->input('tax_code'); // Get the VAT code from the form
-
-        // Update only the user with the given ID
-        $updated = DB::table('users')
-            ->where('id', $userId)
-            ->update(['first_code' => $taxCode]);
-
-        if ($updated) {
-            return back()->with('message', 'Tax Code updated successfully.');
-        } else {
-            return back()->with('error', 'Failed to update Tax Code or no changes were made.');
-        }
-    }
-
-    public function otpCode(Request $request)
-    {
-        $userId = $request->input('user_id'); // Get the user ID from the form
-        $otpCode = $request->input('otp_code'); // Get the VAT code from the form
-
-        // Update only the user with the given ID
-        $updated = DB::table('users')
-            ->where('id', $userId)
-            ->update(['second_code' => $otpCode]);
-
-        if ($updated) {
-            return back()->with('message', 'otp Code updated successfully.');
-        } else {
-            return back()->with('error', 'Failed to update otp Code or no changes were made.');
-        }
-    }
     public function vatCode(Request $request)
     {
-        $userId = $request->input('user_id'); // Get the user ID from the form
-        $vatCode = $request->input('vat_code'); // Get the VAT code from the form
-
-        // Update only the user with the given ID
-        $updated = DB::table('users')
-            ->where('id', $userId)
-            ->update(['third_code' => $vatCode]);
-
-        if ($updated) {
-            return back()->with('message', 'VAT Code updated successfully.');
-        } else {
-            return back()->with('error', 'Failed to update VAT Code or no changes were made.');
-        }
+        $users = array();
+        $users['first_code'] = $request->input('vat_code');;
+        $update = DB::table('users')->update($users);
+        return back()->with('message', 'VAT Code updated, successfully');
     }
 }

@@ -18,6 +18,7 @@ class KycController extends Controller
         // Fetch all users with KYC uploaded
         $kyc = User::whereNotNull('id_document')
             ->whereNotNull('proof_address')
+            ->where('kyc_status', 0) // Assuming 0 means 'pending'
             ->select('id', 'first_name', 'last_name', 'email', 'id_document', 'proof_address', 'kyc_status') // Select specific columns
             ->get();
 

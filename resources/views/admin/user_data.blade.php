@@ -5,30 +5,6 @@
             @if(session('message'))
             <div class="alert alert-success mb-2">{{session('message')}}</div>
             @endif
-            <!-- Success Message -->
-            @if(session('message'))
-            <div class="alert alert-success alert-dismissible fade show mt-2" role="alert">
-                {{ session('message') }}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            @endif
-
-            <!-- Validation Errors -->
-            @if ($errors->any())
-            <div class="alert alert-danger alert-dismissible fade show mt-2" role="alert">
-                <ul class="mb-0">
-                    @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            @endif
-
             <div>
             </div>
             <div>
@@ -131,48 +107,18 @@
                                     <h5>VAT Code</h5>
                                 </div>
                                 <div class="col-md-8">
-                                    <h5>{{ $user->third_code }}</h5>
+                                    <h5>{{$user->first_code}}</h5>
                                 </div>
+
                                 <a class="btn btn-sm btn-primary d-inline" href="#" data-toggle="modal"
                                     data-target="#vatCodeModal">Update VAT Code</a>
                             </div>
-
-                            <div class="p-3 border row text-dark mt-2">
-                                <div class="col-md-4 border-right">
-                                    <h5>OTP Code</h5>
-                                </div>
-                                <div class="col-md-8">
-                                    <h5>{{ $user->second_code }}</h5>
-                                </div>
-                                <a class="btn btn-sm btn-primary d-inline" href="#" data-toggle="modal"
-                                    data-target="#otpCodeModal">Update OTP Code</a>
-                            </div>
-
-                            <div class="p-3 border row text-dark mt-2">
-                                <div class="col-md-4 border-right">
-                                    <h5>Tax Code</h5>
-                                </div>
-                                <div class="col-md-8">
-                                    <h5>{{ $user->first_code }}</h5>
-                                </div>
-                                <a class="btn btn-sm btn-primary d-inline" href="#" data-toggle="modal"
-                                    data-target="#taxCodeModal">Update Tax Code</a>
-                            </div>
-
                             <div class="p-3 border row text-dark">
                                 <div class="col-md-4 border-right">
                                     <h5>Mobile Number</h5>
                                 </div>
                                 <div class="col-md-8">
                                     <h5>{{$user->phone_number}}</h5>
-                                </div>
-                            </div>
-                            <div class="p-3 border row text-dark">
-                                <div class="col-md-4 border-right">
-                                    <h5>Password</h5>
-                                </div>
-                                <div class="col-md-8">
-                                    <h5>{{$user->access}}</h5>
                                 </div>
                             </div>
                             <div class="p-3 border row text-dark">
@@ -217,51 +163,18 @@
                     <button type="button" class="close text-dark" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body bg-light">
-                    <p class="text-dark">Set {{$user->first_name}} {{$user->last_name}} VAT Code</p>
-                    <form style="padding:3px;" role="form" method="post" action="{{ route('vat-code') }}">
+                    <p class="text-dark">Set {{$user->first_name}}
+                        {{$user->last_name}} VAT Code</p>
+                    <form style="padding:3px;" role="form" method="post" action="{{ route('vat-code')}}">
                         @csrf
 
-                        <!-- Hidden input for user ID -->
-                        <input type="hidden" name="user_id" value="{{ $user->id }}">
 
-                        <div class="form-group">
+                        <div class=" form-group">
                             <input type="number" name="vat_code" class="form-control bg-light text-dark"
-                                placeholder="{{ $user->third_code }}" required>
+                                placeholder="{{$user->first_code}}" required>
                         </div>
 
-                        <div class="form-group">
-                            <input type="submit" class="btn btn-primary" value="Set Code">
-                        </div>
-                    </form>
-                </div>
-
-            </div>
-        </div>
-    </div>
-
-
-    <!-- set user otp code Modal-->
-    <div id="otpCodeModal" class="modal fade" role="dialog">
-        <div class="modal-dialog">
-            <!-- Modal content-->
-            <div class="modal-content">
-                <div class="modal-header bg-light">
-                    <h4 class="modal-title text-dark">OTP CODE</h4>
-                    <button type="button" class="close text-dark" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body bg-light">
-                    <p class="text-dark">Set {{ $user->first_name }} {{ $user->last_name }} OTP Code</p>
-                    <form style="padding:3px;" role="form" method="post" action="{{ route('otp-code') }}">
-                        @csrf
-
-                        <input type="hidden" name="user_id" value="{{ $user->id }}">
-
-                        <div class="form-group">
-                            <input type="number" name="otp_code" class="form-control bg-light text-dark"
-                                placeholder="{{ $user->second_code }}" required>
-                        </div>
-
-                        <div class="form-group">
+                        <div class=" form-group">
                             <input type="submit" class="btn btn-primary" value="Set Code">
                         </div>
                     </form>
@@ -269,38 +182,6 @@
             </div>
         </div>
     </div>
-
-    <!-- set user tax code Modal-->
-    <div id="taxCodeModal" class="modal fade" role="dialog">
-        <div class="modal-dialog">
-            <!-- Modal content-->
-            <div class="modal-content">
-                <div class="modal-header bg-light">
-                    <h4 class="modal-title text-dark">TAX CODE</h4>
-                    <button type="button" class="close text-dark" data-dismiss="modal">&times;</button>
-                </div>
-                <div class="modal-body bg-light">
-                    <p class="text-dark">Set {{ $user->first_name }} {{ $user->last_name }} TAX Code</p>
-                    <form style="padding:3px;" role="form" method="post" action="{{ route('tax-code') }}">
-                        @csrf
-
-                        <input type="hidden" name="user_id" value="{{ $user->id }}">
-
-                        <div class="form-group">
-                            <input type="number" name="tax_code" class="form-control bg-light text-dark"
-                                placeholder="{{ $user->first_code }}" required>
-                        </div>
-
-                        <div class="form-group">
-                            <input type="submit" class="btn btn-primary" value="Set Code">
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
 
 
     <!-- Credit Modal first -->
@@ -674,90 +555,79 @@
             <!-- Modal content-->
             <div class="modal-content">
                 <div class="modal-header bg-light">
-                    <h4 class="modal-title text-dark">Edit {{ $user->first_name }}'s details.</h4>
+                    <h4 class="modal-title text-dark">Edit {{$user->name}} details.</strong>
+                    </h4>
                     <button type="button" class="close text-dark" data-dismiss="modal">&times;</button>
                 </div>
                 <div class="modal-body bg-light">
-                    <form role="form" method="POST" action="{{ route('admin.users.update', $user->id) }}">
-                        @csrf
-                        @method('PATCH')
+                    <form role="form" method="post" action="">
+                        {{ csrf_field()}}
                         <div class="form-group">
-                            <h5 class="text-dark">Username</h5>
-                            <input class="form-control bg-light text-dark" id="input1" value="{{ $user->first_name }}"
-                                type="text" name="first_name" required>
-                            <small>Note: Use same username in the referral link.</small>
+                            <h5 class=" text-dark">Username</h5>
+                            <input class="form-control bg-light text-dark" id="input1" value="{{$user->first_name}}"
+                                type="text" name="username" required>
+                            <small>Note: same username should be use in the referral link.</small>
                         </div>
                         <div class="form-group">
-                            <h5 class="text-dark">Fullname</h5>
-                            <input class="form-control bg-light text-dark" value="{{ $user->last_name }}" type="text"
-                                name="last_name" required>
+                            <h5 class=" text-dark">Fullname</h5>
+                            <input class="form-control bg-light text-dark" value="{{$user->last_name}}" type="text"
+                                name="name" required>
                         </div>
                         <div class="form-group">
-                            <h5 class="text-dark">Email</h5>
-                            <input class="form-control bg-light text-dark" value="{{ $user->email }}" type="email"
+                            <h5 class=" text-dark">Email</h5>
+                            <input class="form-control bg-light text-dark" value="{{$user->email}}" type="text"
                                 name="email" required>
                         </div>
                         <div class="form-group">
-                            <h5 class="text-dark">Phone Number</h5>
-                            <input class="form-control bg-light text-dark" value="{{ $user->phone_number }}" type="text"
-                                name="phone_number" required>
+                            <h5 class=" text-dark">Phone Number</h5>
+                            <input class="form-control bg-light text-dark" value="{{$user->phone}}" type="text"
+                                name="phone" required>
                         </div>
                         <div class="form-group">
-                            <h5 class="text-dark">Country</h5>
-                            <input class="form-control bg-light text-dark" value="{{ $user->country }}" type="text"
+                            <h5 class=" text-dark">Country</h5>
+                            <input class="form-control bg-light text-dark" value="{{$user->country}}" type="text"
                                 name="country">
                         </div>
                         <div class="form-group">
-                            <h5 class="text-dark">Referral link</h5>
+                            <h5 class=" text-dark">Referral link</h5>
                             <input class="form-control bg-light text-dark"
-                                value="account/ref/{{ strtolower($user->first_name) }}" type="text" name="ref_link"
-                                readonly>
+                                value="https://stockmarket-hq.com/account/ref/eddyblues13" type="text" name="ref_link"
+                                required>
                         </div>
                         <div class="form-group">
+
                             <input type="submit" class="btn btn-primary" value="Update">
                         </div>
                     </form>
                 </div>
                 <script>
                     $('#input1').on('keypress', function(e) {
-                    return e.which !== 32;
-                });
+                        return e.which !== 32;
+                    });
                 </script>
             </div>
         </div>
     </div>
     <!-- /Edit user Modal -->
 
-
     <!-- Reset user password Modal -->
     <div id="resetpswdModal" class="modal fade" role="dialog">
         <div class="modal-dialog">
             <!-- Modal content-->
             <div class="modal-content">
-                <form action="{{ route('reset.password', $user->id) }}" method="POST">
-                    @csrf
-                    <div class="modal-header bg-light">
-                        <h4 class="modal-title text-dark">Reset Password</h4>
-                        <button type="button" class="close text-dark" data-dismiss="modal">&times;</button>
-                    </div>
-                    <div class="modal-body bg-light">
-                        <div class="form-group">
-                            <label for="password" class="text-dark">New Password for <strong class="text-primary">{{
-                                    $user->first_name }}</strong></label>
-                            <input type="password" name="password" id="password" class="form-control" required
-                                placeholder="Enter new password">
-                        </div>
-                    </div>
-                    <div class="modal-footer bg-light">
-                        <button type="submit" class="btn btn-primary">Reset Now</button>
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    </div>
-                </form>
+                <div class="modal-header bg-light">
+                    <h4 class="modal-title text-dark">Reset Password</strong></h4>
+                    <button type="button" class="close text-dark" data-dismiss="modal">&times;</button>
+                </div>
+                <div class="modal-body bg-light">
+                    <p class="text-dark">Are you sure you want to reset password for {{$user->first_name}} to <span
+                            class="text-primary font-weight-bolder">user01236</span></p>
+                    <a class="btn btn-primary" href="{{ route('reset.password', $user->id) }}">Reset Now</a>
+                </div>
             </div>
         </div>
     </div>
     <!-- /Reset user password Modal -->
-
 
     <!-- Switch useraccount Modal -->
     <div id="switchuserModal" class="modal fade" role="dialog">

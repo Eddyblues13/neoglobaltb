@@ -71,7 +71,7 @@
             font-size: 16px;
         }
     }
-</style> 
+</style>
 
 <script>
     setTimeout(function() {

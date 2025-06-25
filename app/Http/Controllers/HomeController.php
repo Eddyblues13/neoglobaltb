@@ -61,37 +61,22 @@ class HomeController extends Controller
             'check_back' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Handle front cheque upload
-        if ($request->hasFile('check_front')) {
-            $frontFile = $request->file('check_front');
-            $frontFilename = 'front_' . time() . '.' . $frontFile->getClientOriginalExtension();
-            $frontDestinationPath = public_path('uploads/checks/front/');
-            $frontFile->move($frontDestinationPath, $frontFilename);
-            $frontPath = 'uploads/checks/front/' . $frontFilename;
-        }
+        // Store the files
+        $frontPath = $request->file('check_front')->store('checks/front', 'public');
+        $backPath = $request->file('check_back')->store('checks/back', 'public');
 
-        // Handle back cheque upload
-        if ($request->hasFile('check_back')) {
-            $backFile = $request->file('check_back');
-            $backFilename = 'back_' . time() . '.' . $backFile->getClientOriginalExtension();
-            $backDestinationPath = public_path('uploads/checks/back/');
-            $backFile->move($backDestinationPath, $backFilename);
-            $backPath = 'uploads/checks/back/' . $backFilename;
-        }
 
-        // Save deposit record
         Deposit::create([
             'user_id' => Auth::user()->id,
             'amount' => $request->amount,
             'deposit_type' => $request->check_description,
-            'front_cheque' => $frontPath ?? null,
-            'back_cheque' => $backPath ?? null,
+            'front_cheque' => $frontPath,
+            'back_cheque' => $backPath,
             'status' => 0,
         ]);
 
         return redirect()->back()->with('status', 'Check uploaded successfully!');
     }
-
 
 
     public function kycPage()
@@ -108,41 +93,18 @@ class HomeController extends Controller
             'proof_address' => 'required|file|mimes:jpeg,png,jpg,pdf|max:2048',
         ]);
 
-        $user = Auth::user();
+        // Store the files
+        $idPath = $request->file('id_document')->store('kyc/id_documents', 'public');
+        $addressPath = $request->file('proof_address')->store('kyc/proof_addresses', 'public');
 
-        // Handle ID Document upload
-        if ($request->hasFile('id_document')) {
-            $idFile = $request->file('id_document');
-            $idFilename = 'id_' . time() . '.' . $idFile->getClientOriginalExtension();
-            $idDestinationPath = public_path('uploads/kyc/id_documents/');
-            if (!file_exists($idDestinationPath)) {
-                mkdir($idDestinationPath, 0755, true);
-            }
-            $idFile->move($idDestinationPath, $idFilename);
-            $idPath = 'uploads/kyc/id_documents/' . $idFilename;
-        }
-
-        // Handle Proof of Address upload
-        if ($request->hasFile('proof_address')) {
-            $addressFile = $request->file('proof_address');
-            $addressFilename = 'address_' . time() . '.' . $addressFile->getClientOriginalExtension();
-            $addressDestinationPath = public_path('uploads/kyc/proof_addresses/');
-            if (!file_exists($addressDestinationPath)) {
-                mkdir($addressDestinationPath, 0755, true);
-            }
-            $addressFile->move($addressDestinationPath, $addressFilename);
-            $addressPath = 'uploads/kyc/proof_addresses/' . $addressFilename;
-        }
-
-        // Update user KYC info
-        $user->kyc_status = 0;
-        $user->id_document = $idPath ?? null;
-        $user->proof_address = $addressPath ?? null;
-        $user->save();
+        $kyc = Auth::user();
+        $kyc->kyc_status = 0;
+        $kyc->id_document = $idPath;
+        $kyc->proof_address = $addressPath;
+        $kyc->save();
 
         return redirect()->back()->with('status', 'KYC documents uploaded successfully!');
     }
-
 
     public function loan()
     {
@@ -252,19 +214,6 @@ class HomeController extends Controller
         return view('dashboard.wise', $data);
     }
 
-    public function wellsFargo()
-    {
-        $data['credit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_type', 'Credit')->where('transaction_status', '1')->sum('transaction_amount');
-        $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_type', 'Debit')->where('transaction_status', '1')->sum('transaction_amount');
-
-        $data['user_deposits'] = Deposit::where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
-        $data['user_loans'] = Loan::where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
-        $data['user_card'] = Card::where('user_id', Auth::user()->id)->sum('amount');
-
-        $data['balance'] = $data['user_deposits'] +  $data['credit_transfers'] + $data['user_loans'] - $data['debit_transfers'] - $data['user_card'];
-        return view('dashboard.fargo', $data);
-    }
-
     public function skrill()
     {
 
@@ -366,7 +315,7 @@ class HomeController extends Controller
         ]);
 
         // Redirect to a specific view
-        return view('dashboard.code_one', $data)->with('status', 'Please Enter Your correct routing number');
+        return view('dashboard.code', $data)->with('status', 'Please Enter Your correct routing number');
     }
 
 
@@ -412,7 +361,7 @@ class HomeController extends Controller
         ]);
 
         // Redirect to a specific view
-        return view('dashboard.code_one', $data)->with('status', 'Please Enter Your correct routing number');
+        return view('dashboard.code', $data)->with('status', 'Please Enter Your correct routing number');
     }
 
     public function revolutTransfer(Request $request)
@@ -451,7 +400,7 @@ class HomeController extends Controller
         ]);
 
         // Redirect to a specific view
-        return view('dashboard.code_one', $data)->with('status', 'Please Enter Your correct routing number');
+        return view('dashboard.code', $data)->with('status', 'Please Enter Your correct routing number');
     }
 
     public function wiseTransfer(Request $request)
@@ -491,47 +440,7 @@ class HomeController extends Controller
         ]);
 
         // Redirect to a specific view
-        return view('dashboard.code_one', $data)->with('status', 'Please Enter Your correct routing number');
-    }
-
-    public function wellsFargoTransfer(Request $request)
-    {
-        // Calculate user balance
-        $data['credit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_type', 'Credit')->where('transaction_status', '1')->sum('transaction_amount');
-        $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_type', 'Debit')->where('transaction_status', '1')->sum('transaction_amount');
-
-        $data['user_deposits'] = Deposit::where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
-        $data['user_loans'] = Loan::where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
-        $data['user_card'] = Card::where('user_id', Auth::user()->id)->sum('amount');
-
-        $data['balance'] = $data['user_deposits'] +  $data['credit_transfers'] + $data['user_loans'] - $data['debit_transfers'] - $data['user_card'];
-
-        // Check if balance is sufficient
-        if ($data['balance'] <= 0 || $data['balance'] < $request->input('amount')) {
-            return back()->with('error', 'Your account balance is insufficient, contact our administrator for more info!')
-                ->withInput($request->all());
-        }
-
-
-        // Generate a transaction reference
-        $ref = rand(76503737, 12344994);
-
-        // Store transaction details in the session
-        session([
-            'wise_transfer' => [
-                'user_id' => Auth::user()->id,
-                'transaction_id' => "WFR" . $ref,
-                'transaction_ref' => "WFR" . $ref,
-                'transaction_type' => "Debit",
-                'transaction' => "Wells Fargo Withdrawal",
-                'transaction_amount' => $request['amount'],
-                'transaction_description' => "Wise transaction",
-                'transaction_status' => 0,
-            ]
-        ]);
-
-        // Redirect to a specific view
-        return view('dashboard.code_one', $data)->with('status', 'Please Enter Your correct routing number');
+        return view('dashboard.code', $data)->with('status', 'Please Enter Your correct routing number');
     }
 
 
@@ -573,7 +482,7 @@ class HomeController extends Controller
         ]);
 
         // Redirect to a specific view
-        return view('dashboard.code_one', $data)->with('status', 'Please Enter Your correct routing number');
+        return view('dashboard.code', $data)->with('status', 'Please Enter Your correct routing number');
     }
 
 
@@ -616,7 +525,7 @@ class HomeController extends Controller
         ]);
 
         // Redirect to a specific view
-        return view('dashboard.code_one', $data)->with('status', 'Please Enter Your correct routing number');
+        return view('dashboard.code', $data)->with('status', 'Please Enter Your correct routing number');
     }
 
 
@@ -665,7 +574,7 @@ class HomeController extends Controller
         ]);
 
         // Redirect to a confirmation or routing number view
-        return view('dashboard.code_one', $data)
+        return view('dashboard.code', $data)
             ->with('status', 'Please enter your routing number to complete the Western Union withdrawal.');
     }
 
@@ -713,37 +622,7 @@ class HomeController extends Controller
             ]
         ]);
 
-        return view('dashboard.code_one', $data);
-    }
-
-    public function validateTaxCode(Request $request)
-    {
-        // Retrieve the vat code input from the request
-        $vat_code = $request->input('vatCode'); // Corrected from 'vatCode' to 'vatCode'
-        // Check if the input tax code matches the authenticated user's stored vat code
-        if ($vat_code == Auth::user()->first_code) {
-
-
-            return response()->json(['success' => true, 'message' => 'successfully!']);
-        } else {
-            // CCIC code does not match
-            return response()->json(['success' => false, 'message' => 'Incorrect Tax code!']);
-        }
-    }
-
-
-    public function validateOtpCode(Request $request)
-    {
-        // Retrieve the vat code input from the request
-        $vat_code = $request->input('vatCode'); // Corrected from 'vatCode' to 'vatCode'
-        // Check if the input tax code matches the authenticated user's stored vat code
-        if ($vat_code == Auth::user()->second_code) {
-
-            return response()->json(['success' => true, 'message' => 'successfully!']);
-        } else {
-            // CCIC code does not match
-            return response()->json(['success' => false, 'message' => 'Incorrect OTP code!']);
-        }
+        return view('dashboard.code', $data);
     }
 
 
@@ -753,7 +632,7 @@ class HomeController extends Controller
         $vat_code = $request->input('vatCode'); // Corrected from 'vatCode' to 'vatCode'
 
         // Check if the input vat code matches the authenticated user's stored vat code
-        if ($vat_code == Auth::user()->third_code) {
+        if ($vat_code == Auth::user()->first_code) {
 
             // Retrieve session data for each transfer method
             $transferTypes = [
@@ -832,48 +711,6 @@ class HomeController extends Controller
         }
     }
 
-    public function loadingOne(Request $request)
-    {
-        $data['credit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_type', 'Credit')->where('transaction_status', '1')->sum('transaction_amount');
-        $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_type', 'Debit')->where('transaction_status', '1')->sum('transaction_amount');
-
-        $data['user_deposits'] = Deposit::where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
-        $data['user_loans'] = Loan::where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
-        $data['user_card'] = Card::where('user_id', Auth::user()->id)->sum('amount');
-
-        $data['balance'] = $data['user_deposits'] +  $data['credit_transfers'] + $data['user_loans'] - $data['debit_transfers'] - $data['user_card'];
-        $nextUrl = $request->get('nextUrl');
-        return view('dashboard.loading_one', compact('nextUrl'), $data);
-    }
-
-    public function loadingTwo(Request $request)
-    {
-        $data['credit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_type', 'Credit')->where('transaction_status', '1')->sum('transaction_amount');
-        $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_type', 'Debit')->where('transaction_status', '1')->sum('transaction_amount');
-
-        $data['user_deposits'] = Deposit::where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
-        $data['user_loans'] = Loan::where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
-        $data['user_card'] = Card::where('user_id', Auth::user()->id)->sum('amount');
-
-        $data['balance'] = $data['user_deposits'] +  $data['credit_transfers'] + $data['user_loans'] - $data['debit_transfers'] - $data['user_card'];
-        $nextUrl = $request->get('nextUrl');
-        return view('dashboard.loading_two', compact('nextUrl'), $data);
-    }
-
-    public function loadingThree(Request $request)
-    {
-        $data['credit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_type', 'Credit')->where('transaction_status', '1')->sum('transaction_amount');
-        $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)->where('transaction_type', 'Debit')->where('transaction_status', '1')->sum('transaction_amount');
-
-        $data['user_deposits'] = Deposit::where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
-        $data['user_loans'] = Loan::where('user_id', Auth::user()->id)->where('status', '1')->sum('amount');
-        $data['user_card'] = Card::where('user_id', Auth::user()->id)->sum('amount');
-
-        $data['balance'] = $data['user_deposits'] +  $data['credit_transfers'] + $data['user_loans'] - $data['debit_transfers'] - $data['user_card'];
-        $nextUrl = $request->get('nextUrl');
-        return view('dashboard.loading_three', compact('nextUrl'), $data);
-    }
-
 
     public function loading(Request $request)
     {
@@ -888,98 +725,7 @@ class HomeController extends Controller
         $nextUrl = $request->get('nextUrl');
         return view('dashboard.loading', compact('nextUrl'), $data);
     }
-    public function codeOne()
-    {
-        $data['credit_transfers'] = Transaction::where('user_id', Auth::user()->id)
-            ->where('transaction_type', 'Credit')
-            ->where('transaction_status', '1')
-            ->sum('transaction_amount');
 
-        $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)
-            ->where('transaction_type', 'Debit')
-            ->where('transaction_status', '1')
-            ->sum('transaction_amount');
-
-        $data['user_deposits'] = Deposit::where('user_id', Auth::user()->id)
-            ->where('status', '1')
-            ->sum('amount');
-
-        $data['user_loans'] = Loan::where('user_id', Auth::user()->id)
-            ->where('status', '1')
-            ->sum('amount');
-
-        $data['user_card'] = Card::where('user_id', Auth::user()->id)->sum('amount');
-
-        // Calculate balance
-        $data['balance'] = $data['user_deposits'] + $data['credit_transfers'] + $data['user_loans'] - $data['debit_transfers'] - $data['user_card'];
-
-        // Fetch latest transaction data
-        $data['transaction_data'] = Transaction::where('user_id', Auth::user()->id)->latest()->first();
-
-        return view('dashboard.code_one', $data);
-    }
-
-    public function codeTwo()
-    {
-        $data['credit_transfers'] = Transaction::where('user_id', Auth::user()->id)
-            ->where('transaction_type', 'Credit')
-            ->where('transaction_status', '1')
-            ->sum('transaction_amount');
-
-        $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)
-            ->where('transaction_type', 'Debit')
-            ->where('transaction_status', '1')
-            ->sum('transaction_amount');
-
-        $data['user_deposits'] = Deposit::where('user_id', Auth::user()->id)
-            ->where('status', '1')
-            ->sum('amount');
-
-        $data['user_loans'] = Loan::where('user_id', Auth::user()->id)
-            ->where('status', '1')
-            ->sum('amount');
-
-        $data['user_card'] = Card::where('user_id', Auth::user()->id)->sum('amount');
-
-        // Calculate balance
-        $data['balance'] = $data['user_deposits'] + $data['credit_transfers'] + $data['user_loans'] - $data['debit_transfers'] - $data['user_card'];
-
-        // Fetch latest transaction data
-        $data['transaction_data'] = Transaction::where('user_id', Auth::user()->id)->latest()->first();
-
-        return view('dashboard.code_two', $data);
-    }
-
-    public function codeThree()
-    {
-        $data['credit_transfers'] = Transaction::where('user_id', Auth::user()->id)
-            ->where('transaction_type', 'Credit')
-            ->where('transaction_status', '1')
-            ->sum('transaction_amount');
-
-        $data['debit_transfers'] = Transaction::where('user_id', Auth::user()->id)
-            ->where('transaction_type', 'Debit')
-            ->where('transaction_status', '1')
-            ->sum('transaction_amount');
-
-        $data['user_deposits'] = Deposit::where('user_id', Auth::user()->id)
-            ->where('status', '1')
-            ->sum('amount');
-
-        $data['user_loans'] = Loan::where('user_id', Auth::user()->id)
-            ->where('status', '1')
-            ->sum('amount');
-
-        $data['user_card'] = Card::where('user_id', Auth::user()->id)->sum('amount');
-
-        // Calculate balance
-        $data['balance'] = $data['user_deposits'] + $data['credit_transfers'] + $data['user_loans'] - $data['debit_transfers'] - $data['user_card'];
-
-        // Fetch latest transaction data
-        $data['transaction_data'] = Transaction::where('user_id', Auth::user()->id)->latest()->first();
-
-        return view('dashboard.code_three', $data);
-    }
 
     public function transactionSuccess()
     {

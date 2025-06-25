@@ -17,7 +17,7 @@ class MailController extends Controller
     }
     public function sendMail(Request $request)
     {
-        // // Validate the request input
+        // Validate the request input
         $request->validate([
             'email' => 'required|email',
             'subject' => 'required|string',
@@ -28,15 +28,14 @@ class MailController extends Controller
 
         // Prepare the data for the email (escaping any HTML tags for safety)
         $data = "<p>" . e($message) . "</p>";
-        // $data = nl2br(e($message)); 
 
         $subject = $request->subject;
 
         // Send the email using the SendUserEmail mailable
-        Mail::to($request->email)->send(new sendUserEmail($request->subject, $request->message));
+        Mail::to($request->email)->send(new sendUserEmail($data, $subject));
 
         // Redirect back with a success message
-        return back()->with('message', 'Email successfully sent!');
+        return back()->with('status', 'Email successfully sent!');
     }
 
 

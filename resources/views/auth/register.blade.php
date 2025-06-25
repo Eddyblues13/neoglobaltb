@@ -52,11 +52,6 @@
                                 novalidate>
                                 @csrf
 
-                                <!-- Honeypot field -->
-                                <input type="text" name="honeypot" style="display:none;">
-                                <!-- Timestamp field -->
-                                <input type="hidden" name="timestamp" value="{{ now()->timestamp }}">
-
                                 <div class="mb-3">
                                     <label for="username" class="form-label">First Name</label>
                                     <input type="text" class="form-control" id="fullname" name="first_name"
@@ -487,7 +482,6 @@
                                             <option value='Greece'>Greece (€)</option>
                                             <option value='Greenland'>Greenland (Kr.)</option>
                                             <option value='Grenada'>Grenada ($)</option>
-                                            <option value="Great Britain">Great Britain (£)</option>
                                             <option value='Guadeloupe'>Guadeloupe (€)</option>
                                             <option value='Guam'>Guam ($)</option>
                                             <option value='Guatemala'>Guatemala (Q)</option>
